@@ -14,6 +14,9 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+# mips jar
+Mars4_4.jar
+
 # =========================
 # Operating System Files
 # =========================
