@@ -4,6 +4,16 @@
 # safe to be called from from other files
 #
 # return9 exposed to outside, this .asm only changes return9 on random9Word calls
+#
+# globals:
+#   random9word
+#     String random9word():
+#       returns random 9 letter word in v0
+#   scrabbleList
+#     String[] scrabbleList(String word):
+#       a0: 9 letter word to check against (with middle character)
+#       returns heap address in v0 of target words
+ 
 .globl	random9Word
 .globl	scrabbleList
 
@@ -11,50 +21,68 @@
 	buffer:	.space 10			# longest word will be 9 letters + /0, use for read from file
 	return9:.space 10			# address of 9 letter word to return (allows buffer reuse)
 
-	testFi:	.asciiz "9LetterWordList10.txt"
-
-	words9:	.asciiz "9LetterWordList10.txt"	# name of 9 letter word list file
-	num9:	.word	10			# number of words in 9 letter word list file
+#	testFi:	.asciiz "9LetterWordList10.txt"  	
+#	testWo:	.asciiz "oncomings"
+#	testSc: .asciiz "4LetterWordList3911.txt"
+#	testSc2:.asciiz "5LetterWordList4.txt"
 
 	nl:	.asciiz	"\n"
 	
-	testWo:	.asciiz "abandoned"
-	testSc: .asciiz "4LetterWordList3911.txt"
-	testSc2:.asciiz "5LetterWordList4.txt"
+#	words4: .asciiz "4LetterWordList3911.txt"
+#	words5: .asciiz "5LetterWordList8649.txt"
+#	words6: .asciiz "6LetterWordList15246.txt"
+#	words7: .asciiz "7LetterWordList23123.txt"
+#	words8: .asciiz "8LetterWordList28423.txt"
+#	words9: .asciiz "9LetterWordList24869.txt"
+#	num9:	.word	24869
+
+	words4: .asciiz "s4LetterWordList1967.txt"
+	words5: .asciiz "s5LetterWordList3824.txt"
+	words6: .asciiz "s6LetterWordList6063.txt"
+	words7: .asciiz "s7LetterWordList7973.txt"
+	words8: .asciiz "s8LetterWordList8326.txt"
+	words9: .asciiz "s9LetterWordList7729.txt"
+	num9:	.word	7729
 			
+	conf4:	.asciiz "...4 letters generated\n"
+	conf5:	.asciiz "...5 letters generated\n"
+	conf6:	.asciiz "...6 letters generated\n"
+	conf7:	.asciiz "...7 letters generated\n"
+	conf8:	.asciiz "...8 letters generated\n"
+	conf9:	.asciiz "...9 letters generated\n"
+		
 	oriTbl: .space 26
-	
 	.align	2 
 	chkTbl: .space 28
 .text
 
-testMisc:
-	#j test9
-	la	$a0, testWo
-	jal	scrabbleList
-	j testEnd
+#testMisc:
+#	#j test9
+#	la	$a0, testWo
+#	jal	scrabbleList
+#	j testEnd
 	
 	
-test9:
-	li	$s0, 10			# run the test 10 times
-test9Loop:
-	jal	random9Word		# put random 9 letter word in $v0
-	move	$a0, $v0		# and print
-	li	$v0, 4
-	syscall
-	la	$a0, nl
-	syscall
+#test9:
+#	li	$s0, 10			# run the test 10 times
+#test9Loop:
+#	jal	random9Word		# put random 9 letter word in $v0
+#	move	$a0, $v0		# and print
+#	li	$v0, 4
+#	syscall
+#	la	$a0, nl
+#	syscall
+#	
+#	addi	$s0, $s0, -1
+#	bnez	$s0, test9Loop
+#	
+#	j testEnd
 	
-	addi	$s0, $s0, -1
-	bnez	$s0, test9Loop
 	
-	j testEnd
-	
-	
-testEnd:
-	li	$v0, 10
-
-	syscall
+#testEnd:
+#	li	$v0, 10
+#
+#	syscall
 
 
 # using hashtable
@@ -64,6 +92,10 @@ testEnd:
 
 # using stringcompare
 # for every word, 9 load, 9 store prep, 5 write, 9*5 compare
+
+##################################################################
+##################################################################
+##################################################################
 
 
 ##
@@ -108,21 +140,77 @@ makeOriTbl:
 	move	$s2, $s0	# current heap address
 	
 # write 4 letter words
-	la	$a0, testSc	# source file
+	la	$a0, words4	# source file
 	li	$a1, 5		# number of letters including /0
 	move	$a2, $s1	# middle letter
 	move	$a3, $s2	# heap location to start writing from
 	jal	checkList
 	move	$s2, $v0
 	
+	la	$a0, conf4
+	li	$v0, 4
+	syscall
+	
 # write 5 letter words
-	la	$a0, testSc2	# source file
+	la	$a0, words5	# source file
 	li	$a1, 6		# number of letters including /0
 	move	$a2, $s1	# middle letter
 	move	$a3, $s2	# heap location to start writing from
 	jal	checkList
 	move	$s2, $v0
 	
+	la	$a0, conf5
+	li	$v0, 4
+	syscall
+
+# write 6 letter words
+	la	$a0, words6	# source file
+	li	$a1, 7		# number of letters including /0
+	move	$a2, $s1	# middle letter
+	move	$a3, $s2	# heap location to start writing from
+	jal	checkList
+	move	$s2, $v0
+	
+	la	$a0, conf6
+	li	$v0, 4
+	syscall
+
+# write 7 letter words
+	la	$a0, words7	# source file
+	li	$a1, 8		# number of letters including /0
+	move	$a2, $s1	# middle letter
+	move	$a3, $s2	# heap location to start writing from
+	jal	checkList
+	move	$s2, $v0
+	
+	la	$a0, conf7
+	li	$v0, 4
+	syscall	
+	
+# write 8 letter words
+	la	$a0, words8	# source file
+	li	$a1, 9		# number of letters including /0
+	move	$a2, $s1	# middle letter
+	move	$a3, $s2	# heap location to start writing from
+	jal	checkList
+	move	$s2, $v0
+	
+	la	$a0, conf8
+	li	$v0, 4
+	syscall	
+
+# write 9 letter words
+	la	$a0, words9	# source file
+	li	$a1, 10		# number of letters including /0
+	move	$a2, $s1	# middle letter
+	move	$a3, $s2	# heap location to start writing from
+	jal	checkList
+	move	$s2, $v0
+	
+	la	$a0, conf9
+	li	$v0, 4
+	syscall	
+			
 # finish heap with @ and /0
 	li	$t0, 64
 	sb	$t0, 0($s2)
@@ -236,6 +324,11 @@ finishUp:
 	addiu	$sp, $sp, 20
 	jr	$ra
 
+##################################################################
+##################################################################
+##################################################################
+
+
 ##
 # v0: returns address of random 9 letter word
 ##
@@ -283,6 +376,11 @@ normalLoop:
 	lw	$ra, 0($sp)	# recover return address from stack
 	addiu	$sp, $sp, 4
 	jr	$ra
+
+##################################################################
+##################################################################
+##################################################################
+
 
 ##
 #	changes $v0, $a1, and $a2
