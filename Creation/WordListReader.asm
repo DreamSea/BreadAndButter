@@ -186,7 +186,7 @@ makeOriTbl:
 	la	$a0, conf7
 	li	$v0, 4
 	syscall	
-	
+
 # write 8 letter words
 	la	$a0, words8	# source file
 	li	$a1, 9		# number of letters including /0
@@ -282,6 +282,7 @@ wipeCheck:
 loopCheck:	
 	lb	$t2, buffer($t0)
 	addi	$t2, $t2, -97
+	bltz	$t2, grabNext		# bad letter found, probably '-'
 	lb	$t3, oriTbl($t2)
 	lb	$t4, chkTbl($t2)
 	addi	$t4, $t4, 1
