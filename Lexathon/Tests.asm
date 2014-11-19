@@ -1,6 +1,6 @@
 .data
 	nl:	.asciiz	"\n"
-	.globl	main
+#	.globl	main
 	fake:	.asciiz "azazazaza"
 .text
 main:

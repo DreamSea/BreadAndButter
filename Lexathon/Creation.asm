@@ -36,12 +36,12 @@
 #	words9: .asciiz "9LetterWordList24869.txt"
 #	num9:	.word	24869
 
-	words4: .asciiz "s4LetterWordList1967.txt"
-	words5: .asciiz "s5LetterWordList3824.txt"
-	words6: .asciiz "s6LetterWordList6063.txt"
-	words7: .asciiz "s7LetterWordList7973.txt"
-	words8: .asciiz "s8LetterWordList8326.txt"
-	words9: .asciiz "s9LetterWordList7729.txt"
+	words4: .asciiz "WordList\\s4LetterWordList1967.txt"
+	words5: .asciiz "WordList\\s5LetterWordList3824.txt"
+	words6: .asciiz "WordList\\s6LetterWordList6063.txt"
+	words7: .asciiz "WordList\\s7LetterWordList7973.txt"
+	words8: .asciiz "WordList\\s8LetterWordList8326.txt"
+	words9: .asciiz "WordList\\s9LetterWordList7729.txt"
 	num9:	.word	7729
 			
 	conf4:	.asciiz "...4 letters generated\n"
@@ -56,7 +56,7 @@
 	chkTbl: .space 28
 .text
 
-#testMisc:
+testMisc:
 #	#j test9
 #	la	$a0, testWo
 #	jal	scrabbleList
