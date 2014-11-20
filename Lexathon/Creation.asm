@@ -12,7 +12,7 @@
 #   scrabbleList
 #     String[] scrabbleList(String word):
 #       a0: 9 letter word to check against (with middle character)
-#       returns heap address in v0 of target words
+#       returns statid data address in v0 containing list
  
 .globl	random9Word
 .globl	scrabbleList
@@ -20,6 +20,8 @@
 .data
 	buffer:	.space 10			# longest word will be 9 letters + /0, use for read from file
 	return9:.space 10			# address of 9 letter word to return (allows buffer reuse)
+	theList:.space 1000			# arbitrary estimate of 1000 bytes for scrabble list
+	
 
 #	testFi:	.asciiz "9LetterWordList10.txt"  	
 #	testWo:	.asciiz "oncomings"
@@ -49,14 +51,14 @@
 	conf6:	.asciiz "...6 letters generated\n"
 	conf7:	.asciiz "...7 letters generated\n"
 	conf8:	.asciiz "...8 letters generated\n"
-	conf9:	.asciiz "...9 letters generated\n"
+	conf9:	.asciiz "...9 letters generated\n\n"
 		
 	oriTbl: .space 26
 	.align	2 
 	chkTbl: .space 28
 .text
 
-testMisc:
+# testMisc:
 #	#j test9
 #	la	$a0, testWo
 #	jal	scrabbleList
@@ -132,12 +134,16 @@ makeOriTbl:
 	subi	$t0, $t0, 1
 	bnez	$t0, makeOriTbl	
 
-## heap pointer		
-	li	$a0, 0		# allocate 'zero' bytes on heap
-	li	$v0, 9
-	syscall
-	move	$s0, $v0	# address of heap base
-	move	$s2, $s0	# current heap address
+## heap pointer	
+#	li	$a0, 0		# allocate 'zero' bytes on heap
+#	li	$v0, 9
+#	syscall
+#	move	$s0, $v0	# address of heap base
+#	move	$s2, $s0	# current heap address
+
+## setting up list of words to return		
+	la	$s0, theList	# address of list base
+	move	$s2, $s0	# current list index address
 	
 # write 4 letter words
 	la	$a0, words4	# source file
@@ -211,17 +217,18 @@ makeOriTbl:
 	li	$v0, 4
 	syscall	
 			
-# finish heap with @ and /0
+# finish list with @ and /0
 	li	$t0, 64
 	sb	$t0, 0($s2)
 	sb	$0, 1($s2)
 	addi	$s2, $s2, 2
-	sub	$t0, $s2, $s0
-# real heap pointer		
-	move	$a0, $t0	# allocate $t0 bytes on heap
-	li	$v0, 9
-	syscall
+#	sub	$t0, $s2, $s0	leftover heap math
 
+# real heap pointer		
+#	move	$a0, $t0	# allocate $t0 bytes on heap
+#	li	$v0, 9
+#	syscall
+	la	$v0, theList
 		
 	lw	$s2, 12($sp)		
 	lw	$s1, 8($sp)
