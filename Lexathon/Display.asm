@@ -105,7 +105,7 @@ printState:
 	li	$v0, 4
 	syscall
 	
-	lw	$a0, ($a1)
+	move	$a0, $a1
 	syscall
 	
 	la	$a0, _nl
