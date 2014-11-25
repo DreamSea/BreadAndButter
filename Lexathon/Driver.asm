@@ -18,6 +18,8 @@ newGame:
 	move	$a0, $s0
 	jal	scrabbleList
 	move	$s1, $v0		# store word list in $s1
+	move	$a0, $s1
+	jal	generateState		# prep state
 newGameChoice:	
 	jal	printReadyInfo
 	jal	getUserChar
@@ -39,6 +41,17 @@ gameLoop:
 	move	$a0, $t0
 	jal	printTime
 	
+	li	$s3, 4			# s3 contains word length of current list
+showWords:	
+	move	$a0, $s3
+	jal	getState
+	move	$a0, $s3
+	move	$a1, $v0
+	jal	printState
+	
+	addi	$s3, $s3, 1
+	blt	$s3, 10, showWords
+	
 	move	$a0, $s0		# print 3x3 grid
 	jal	print3x3Word
 	
@@ -48,7 +61,7 @@ gameLoop:
 endGame:
 	jal	printGameOver
 	
-	### temp stuff
+	### temp stuff check what the list is
 	move	$a0, $s1
 	li	$v0, 4
 	syscall

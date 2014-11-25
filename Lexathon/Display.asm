@@ -1,6 +1,6 @@
 .globl	printTitleInfo getUserChar printLn printTime
 .globl	printReadyInfo getUserString print3x3Word
-.globl	printGameOver
+.globl	printGameOver printState
 .data
 infoSt:	.asciiz	"(n)ew game\n"
 infoQu:	.asciiz	"(q)uit\n"
@@ -10,6 +10,7 @@ strCmd:	.asciiz "Command: "
 strTime:.asciiz	"Time Left (s): "
 strGues:.asciiz "Guess: "
 strOver:.asciiz "Time is up.\n"
+strList:.asciiz " letters: "
 _tab:	.asciiz	"\t"
 #_left:	.asciiz " ["
 #_right:	.asciiz	"] "
@@ -92,6 +93,23 @@ getUserString:
 	syscall
 	syscall
 	move	$v0, $t0
+	jr	$ra
+
+## for printing state of guessed words
+# input $a0: number of letters
+# input $a1: address of state
+printState:
+	li	$v0, 1		# print number
+	syscall
+	la	$a0, strList
+	li	$v0, 4
+	syscall
+	
+	lw	$a0, ($a1)
+	syscall
+	
+	la	$a0, _nl
+	syscall
 	jr	$ra
 
 ## prints 9 letter string in 3x3 square
