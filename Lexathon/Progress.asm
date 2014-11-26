@@ -1,4 +1,4 @@
-.globl	generateState, getState, putWord
+.globl	generateState, getState, putWord, checkWord, collapseList
 
 .data
 state:	.space 1000			# arbitrary estimate, copying theList size
@@ -10,48 +10,22 @@ addr7:	.word 0
 addr8:	.word 0
 addr9:	.word 0
 
-fake:	.asciiz "aaaa aaaa aaaa bbbbb bbbbb bbbbb bbbbb bbbbb jjjjjj nnnnmmmm kkkwwwmmm @"
-fakeWd:	.asciiz "hmmm5"
+fake:	.asciiz "a . b . c . . ... . w . a .. wawta @"
+fakeWd:	.asciiz "@aaaa"
 nl_:	.asciiz "\n"
 
 .text
 
 testing:
 	la	$a0, fake
-	jal	generateState
-	
-	li	$a0, 5
-	jal	getState
-	move	$a0, $v0
-	li	$v0, 4
+	la	$v0, 4
 	syscall
+	jal	collapseList
+	
+	la	$v0, 4
 	la	$a0, nl_
 	syscall
-	
-	li	$a0, 5
-	la	$a1, fakeWd
-	jal	putWord
-	
-	li	$a0, 5
-	jal	getState
-	move	$a0, $v0
-	li	$v0, 4
-	syscall
-	la	$a0, nl_
-	syscall
-	
-	li	$a0, 6
-	la	$a1, fakeWd
-	jal	putWord
-	
-	li	$a0, 5
-	la	$a1, fakeWd
-	jal	putWord
-	
-	li	$a0, 5
-	jal	getState
-	move	$a0, $v0
-	li	$v0, 4
+	la	$a0, fake
 	syscall
 	
 	li	$v0, 10
@@ -102,6 +76,7 @@ backTrack:
 	addi	$t4, $t4, 1
 	j	setAddress		# set up next address in table
 finishLoop:
+	sb	$0, -1($t0)		# write /0 in case of leftovers from previous run
 	jr	$ra
 
 ##
@@ -138,10 +113,86 @@ scanNext:
 	subi	$t0, $t0, 1		# undo last add
 copyWord:
 	lb	$t1, 0($a1)
-	beqz	$t1, end
+	beqz	$t1, end	# \0 reached
+	beq	$t1, 10, end	# \n reached
 	sb	$t1, 0($t0)
 	addi	$t0, $t0, 1
 	addi	$a1, $a1, 1
 	j	copyWord
 end:
 	jr $ra
+
+##
+# checks if word is in list, and if so mark/replace it with periods
+# preserves a1
+##
+# in:	a0 - word list
+# 	a1 - word
+# out:	v0 - 0 if no, 1 if yes
+#	v1 - number of letters in word, meaningless if v0 is 0
+##
+checkWord:
+	li	$v0, 0
+	lb	$t0, 0($a1)		# precheck against '@', '?', etc
+	beq	$t0, 64, finishCW	# @ input found
+	beq	$t0, 10, finishCW	# \n input found
+resetCW:
+	move	$t0, $a1
+	li	$t3, 0			# letter counter for backtrack stage
+loopCW:
+	lb	$t1, 0($a0)
+	lb	$t2, 0($t0)
+	addi	$a0, $a0, 1
+	addi	$t0, $t0, 1
+	addi	$t3, $t3, 1
+	beqz	$t2, successCW		# word reached \0
+	beq	$t2, 10, successCW	# word reached \n
+	beq	$t1, 64, finishCW	# list reached @
+	bne	$t1, $t2, resetCW	# letters dont match
+	j	loopCW
+successCW:
+	blt	$t3, 5, finishCW	# word didnt have enough letters
+	bne	$t1, 32, resetCW	# word was only prefix of list item
+	li	$v0, 1
+	li	$t4, 46			# period
+	addi	$a0, $a0, -1		# undo add
+	addi	$t3, $t3, -1
+	move	$v1, $t3		# store letter count
+replaceCW:
+	addi	$a0, $a0, -1
+	addi	$t3, $t3, -1
+	sb	$t4, 0($a0)		# fill with periods
+	bnez	$t3, replaceCW
+finishCW:
+	jr 	$ra
+	
+##
+# compress list by removing periods
+##
+# in:	a0 - word list
+##
+collapseList:
+	li	$t3, 46		# value of period
+	li	$t4, 32		# value of space
+	li	$t5, 0		# last found (to check against space after period)	
+prepCL:
+	lb	$t1, 0($a0)
+	addi	$a0, $a0, 1
+	beq	$t1, 64, finishCL	# @ found, nothing to compress
+	bne	$t1, $t3, prepCL	# search for periods
+	addi	$t0, $a0, -1		# $t0 contains first period found
+loopCL:
+	lb	$t1, 0($a0)
+	addi	$a0, $a0, 1
+	beqz	$t1, finalWrite
+	beq	$t1, $t3, loopCL	# adv through periods
+	lb	$t2, -2($a0)
+	beq	$t2, $t3, loopCL	# check if last one was a period
+writeCL:	
+	sb	$t1, 0($t0)		# transfer bytes over
+	addi	$t0, $t0, 1
+	j	loopCL
+finalWrite:
+	sb	$0, 0($t0)
+finishCL:
+	jr	$ra	

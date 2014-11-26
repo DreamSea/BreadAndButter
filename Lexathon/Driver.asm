@@ -1,6 +1,7 @@
 .globl main
 .data
-initTime:	.word	10000 # game starts with N seconds
+initTime:	.word	30000 # game starts with N/1000 seconds
+extraTime:	.word	5000 # +N/1000 seconds per good guess
 .text
 main:
 start:
@@ -30,17 +31,18 @@ newGameChoice:
 	j	newGameChoice
 beginGame:
 	lw	$t0, initTime		# initial relative time limit
+	lw	$s6, extraTime		# $s6 contains time bonus per good guess
 	li	$v0, 30			# get system time
 	syscall
 	addu	$s2, $a0, $t0		# $s2 contains absolute time limit
-gameLoop:
-	li	$v0, 30			# update time
+
+	li	$v0, 30			# first time update
 	syscall
 	subu	$t0, $s2, $a0
 	blez	$t0, endGame		# check if time over
 	move	$a0, $t0
 	jal	printTime
-	
+gameLoop:	
 	li	$s3, 4			# s3 contains word length of current list
 showWords:	
 	move	$a0, $s3
@@ -54,20 +56,42 @@ showWords:
 	
 	move	$a0, $s0		# print 3x3 grid
 	jal	print3x3Word
-	
 	jal	getUserString
+	move	$s4, $v0		# s4 contains string input
 
-	j	gameLoop
+	li	$v0, 30			# check time
+	syscall
+	subu	$t0, $s2, $a0
+	blez	$t0, endGame		# check if time over
+	move	$s5, $t0		# s5 contains time left 
+	
+	move	$a0, $s1		# pass list as argument
+	move	$a1, $s4		# pass word as argument
+	jal	checkWord
+	beqz	$v0, continue
+	beq	$v0, 1, goodGuess
+	j	continue
+goodGuess:
+	move	$a0, $v1		# pass number of letters
+	move	$a1, $s4		# pass word
+	jal	putWord
+	add	$s2, $s2, $s6		# +extra time		
+	add	$s5, $s5, $s6
+	move	$a0, $s6
+	jal	printExtraTime
+continue:	
+	move	$a0, $s5		# time info
+	jal	printTime	
+			
+	j gameLoop
+	
 endGame:
 	jal	printGameOver
-	
-	### temp stuff check what the list is
 	move	$a0, $s1
-	li	$v0, 4
-	syscall
+	jal	collapseList	# clean list for leftover print
+	move	$a0, $s1
+	jal	printLeftover
 	jal	printLn
-	jal	printLn
-	### /temp stuff
 	j	start
 quit:
 	li	$v0, 10

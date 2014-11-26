@@ -1,6 +1,6 @@
 .globl	printTitleInfo getUserChar printLn printTime
 .globl	printReadyInfo getUserString print3x3Word
-.globl	printGameOver printState
+.globl	printGameOver printState printExtraTime printLeftover
 .data
 infoSt:	.asciiz	"(n)ew game\n"
 infoQu:	.asciiz	"(q)uit\n"
@@ -11,6 +11,8 @@ strTime:.asciiz	"Time Left (s): "
 strGues:.asciiz "Guess: "
 strOver:.asciiz "Time is up.\n"
 strList:.asciiz " letters: "
+strGood:.asciiz "Word Found, Seconds +"
+strLeft:.asciiz "Words Left: "
 _tab:	.asciiz	"\t"
 #_left:	.asciiz " ["
 #_right:	.asciiz	"] "
@@ -87,12 +89,11 @@ getUserString:
 	la	$a0, inBuff
 	li	$a1, 10
 	syscall
-	move	$t0, $v0	# temp save read info
 	li	$v0, 4
 	la	$a0, _nl	
 	syscall
 	syscall
-	move	$v0, $t0
+	la	$v0, inBuff
 	jr	$ra
 
 ## for printing state of guessed words
@@ -159,5 +160,33 @@ print3x3Finish:
 printGameOver:
 	la	$a0, strOver
 	li	$v0, 4
+	syscall
+	jr	$ra
+	
+## print string for +time
+# input $a0: how much time was added
+printExtraTime:
+	move	$t0, $a0
+	la	$a0, strGood
+	li	$v0, 4
+	syscall
+	div	$a0, $t0, 1000
+	li	$v0, 1
+	syscall
+	la	$a0, _nl
+	li	$v0, 4
+	syscall
+	jr	$ra
+
+## prints leftover words
+# input $a0: leftover words
+printLeftover:
+	move	$t0, $a0
+	la	$a0, strLeft
+	li	$v0, 4
+	syscall
+	move	$a0, $t0
+	syscall
+	la	$a0, _nl
 	syscall
 	jr	$ra
