@@ -4,12 +4,28 @@ A) Currently in Creation.asm…
 
 newline variable is places all over. 
 Is there such thing as header files in MIPS? instead of having it all over? make it global in one file? 
+>> newlines were mainly used in testing. the way driver is hooked up to Display.asm though, can
+>> *probably* (not 100% sure) comment out all the newlines in files other than display, since display
+>> should be the only thing printing anything to console. might be able to make newline label global
+>> similar to how functions can be made global, but I never tried.
 
 Line 128 why -97? What is the Original Table supposed to contain. 
 I can see is it is looping down from 9 -> 0 and breaks to the next thing,
 but I’m not sure what values except the fact the table is 26*4. 
 What does OriginalTable supposed to contain and compare and what does the CheckTable contain?
 I am guessing the OrginalTable contains the valid words CheckTable contains the guess?
+>> table is pretty much int array of size 26, one for each letter. subtracting 97 from ascii value of
+>> 'a' gives 0, which allows for jumping into table with a = 0, b = 1, z = 25, etc. table is same thing
+>> as using hashtable/map to count letters (if youve had to do anything similar in higher level language).
+>> Making each entry byte sized allows for using loadbyte to grab numbers out of the array, and is a big
+>> enough container (0-15) because at most a letter would appear 9 times (given 9 letter words).
+>>
+>> the table stuff in creation is to for checking that word can be made out of letters of another word,
+>> comparing guess word to dictionary word is done in more straightforward way Progress.asm [see checkWord()]
+>> one there just loops through letters one at a time to see if they match exactly
+>>
+>> creation version: abcdefg vs cfbegda has to be confirmed as a match
+>> progress version: abcdefg vs abcdefg has to match, but not abcdefg vs cfbegda
 
 Overview of 
 Creation.asm->(Set Data Variables and Global Functions)->
