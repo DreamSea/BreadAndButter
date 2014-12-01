@@ -38,6 +38,11 @@ but yeah Idk I still can't get it to compile----------
 >> oops, I never really mentioned this anywhere. to build, put the Mars4_4.jar in folder Lexathon.
 >> when assembling, check 'build/assemble all files in same directory' and 'init program counter to global main'
 
+--------------Roger that! I have it compiling and running. For the instructions I entered 'q' to quit and it worked 
+but when I entered 'n' it went into some sort of endless loop. Or How long is is supposed to take? ------------------
+
+
+
 Line 128 why -97? What is the Original Table supposed to contain. 
 I can see is it is looping down from 9 -> 0 and breaks to the next thing,
 but I’m not sure what values except the fact the table is 26*4. 
