@@ -21,11 +21,22 @@ Or could I decrement the total global functions * 4 all in one file and just kee
 storing elements from one file to the next.
 file1 = same as above everything but sub 20 -> store 1 at 0gp -> store 2 at 4gp
 file2 = same as above but no sub ->store1 at 8gp -> store 2 at 12gp -> store 3 at 16gp 
+>> idea for stack pointers (in the end decided not to mess with global pointer since mips/mars isn't
+>> very clear on what it's for), really only need to worry about incr/decr stack pointer when switching
+>> between functions. each function/file is responsible for preserving the original stack pointer on exit,
+>> as in if a function decrs the pointer, then it needs to incr it back before the function finishes. by
+>> having each file responsible for its own, it lets it be certain where a specific value is stored on the
+>> stack. otherwise if set some original value on the stack and other files modify the pointer before returning,
+>> would only be able guess at where the original value is now. guessing in assembly is generally bad. :x
+>>
+>> granted when solo/rambo programming it's possible to just 'know' how all the functions interact and where the
+>> sp is, but it becomes nearly impossible to hook cleanly with functions by other people (if they rely on
+>> the stack pointer).
 
 In the end I don't know if any of what I just typed makes any sense lol! because yeah Idk it seems overly complicated
 but yeah Idk I still can't get it to compile----------
-
-
+>> oops, I never really mentioned this anywhere. to build, put the Mars4_4.jar in folder Lexathon.
+>> when assembling, check 'build/assemble all files in same directory' and 'init program counter to global main'
 
 Line 128 why -97? What is the Original Table supposed to contain. 
 I can see is it is looping down from 9 -> 0 and breaks to the next thing,
