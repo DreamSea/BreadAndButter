@@ -9,6 +9,24 @@ Is there such thing as header files in MIPS? instead of having it all over? make
 >> should be the only thing printing anything to console. might be able to make newline label global
 >> similar to how functions can be made global, but I never tried.
 
+--------Idky but I have all the files in Mars and I build them all, some would build while others had issues 
+referencing  functions from other files. The globl. directives weren't being recognized? Idk I went on a tangent 
+I tried to figure out how to save the function addresses in the global pointer register, but Idk what to do like 
+when setting the functions from other files to the $gp I figured for each address stored you decrement 4 from the
+$gp, and then store the values for each file after decrementing accrodingly.
+file1 = global functions 2 -> sub 8 from gp -> store 1 at 0gp -> store 2 at 4gp
+file2 = global functions 3 -> sub 12 from gp -> store 1 at 0gp -> store 2 at 4gp -> store 3 at 8gp
+
+Or could I decrement the total global functions * 4 all in one file and just keep 
+storing elements from one file to the next.
+file1 = same as above everything but sub 20 -> store 1 at 0gp -> store 2 at 4gp
+file2 = same as above but no sub ->store1 at 8gp -> store 2 at 12gp -> store 3 at 16gp 
+
+In the end I don't know if any of what I just typed makes any sense lol! because yeah Idk it seems overly complicated
+but yeah Idk I still can't get it to compile----------
+
+
+
 Line 128 why -97? What is the Original Table supposed to contain. 
 I can see is it is looping down from 9 -> 0 and breaks to the next thing,
 but I’m not sure what values except the fact the table is 26*4. 
