@@ -1,16 +1,28 @@
-Notes on Project or questions/suggestions
+Notes on Project or questions/suggestions so far
 
-Sorry I know this is way late in the game!
-I was hoping to look over all your code so far and see if anything needs editing after I understand
-what is going on. If anything needs to be done let me know. I would like to review all your codes and 
-hopefully if any questions come up as I go you can answer them here. 
+A) Currently in Creation.asm…
 
-newline variable is in places all over. 
-Is there such thing as header files in MIPS to add Constants that we can implement in every program? 
-Instead of having it all over? 
+newline variable is places all over. 
+Is there such thing as header files in MIPS? instead of having it all over? make it global in one file? 
 
-Currently in Creation.asm…
-Line 128 why -97? 
-In fact, what is the Table supposed to have inside. Could you explain it to me?
-From what I can maybe guess is it is looping down from 9 -> 0 and breaks after to the next thing,
-but I’m not sure what values except the fact the table is 26*4bytes. 
+Line 128 why -97? What is the Original Table supposed to contain. 
+I can see is it is looping down from 9 -> 0 and breaks to the next thing,
+but I’m not sure what values except the fact the table is 26*4. 
+What does OriginalTable supposed to contain and compare and what does the CheckTable contain?
+I am guessing the OrginalTable contains the valid words CheckTable contains the guess?
+
+Overview of 
+Creation.asm->(Set Data Variables and Global Functions)->
+ScrabbleList -> WipeOriTable -> MakeOriTable (in the same function it sets up a list to be written to)
+->CheckList (Sets Variables to pass to openFile)-> OpenFile
+->GrabNext (called to grab next item to be compared. -
+This function is thrown in the beginning when grabbing -
+the first string to compare and when comparisons are -
+not equal in LoopCheck)
+-> NextWord(Returns word from file buffer)
+
+In GrabNext function: 
+After grabbing first string to be compared: If Last letter != '@'
+—>(reset chkTable) -> WipeCheck -> LoopCheck ->(If comparisons are equal)-> CopyWord
+Else 
+—>FinishUp (Closes file)
