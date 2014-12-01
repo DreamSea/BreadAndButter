@@ -40,8 +40,12 @@ but yeah Idk I still can't get it to compile----------
 
 --------------Roger that! I have it compiling and running. For the instructions I entered 'q' to quit and it worked 
 but when I entered 'n' it went into some sort of endless loop. Or How long is is supposed to take? ------------------
-
-
+>> depends on how computer is feeling really. for me it takes anywhere between 5 seconds and 20 seconds to generate
+>> the dictionary/whatever. if you don't see output of "...4 letters generated\n" within 30 seconds then something
+>> is probably wrong (it probably cant find the .txt files). try running mars through command line
+>> with 'java -jar mars4_4.jar' if you haven't been, it's (cmdline) the only way I can get mars to read from files.
+>>
+>> guess there is console output outside of display, forgot about that.
 
 Line 128 why -97? What is the Original Table supposed to contain. 
 I can see is it is looping down from 9 -> 0 and breaks to the next thing,
