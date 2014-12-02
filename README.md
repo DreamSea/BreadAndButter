@@ -41,4 +41,4 @@ During Execution:
   -> If guess is incorrect the game will go on decrementing Timer value
 --> Time Up
   -> User can see the words that they missed
-  -> Return to Main Menu
+  -> Return to Main Menu 
