@@ -39,7 +39,7 @@ beginGame:
 	li	$v0, 30			# first time update
 	syscall
 	subu	$t0, $s2, $a0
-	blez	$t0, endGame		# check if time over
+	blez	$t0, timeUp		# check if time over (?? why is this being checked ??)
 	move	$a0, $t0
 	jal	printTime
 gameLoop:	
@@ -62,12 +62,13 @@ showWords:
 	li	$v0, 30			# check time
 	syscall
 	subu	$t0, $s2, $a0
-	blez	$t0, endGame		# check if time over
+	blez	$t0, timeUp		# check if time over
 	move	$s5, $t0		# s5 contains time left 
 	
 	move	$a0, $s1		# pass list as argument
 	move	$a1, $s4		# pass word as argument
 	jal	checkWord
+	beq	$v0, -1, resign
 	beqz	$v0, continue
 	beq	$v0, 1, goodGuess
 	j	continue
@@ -85,8 +86,12 @@ continue:
 			
 	j gameLoop
 	
-endGame:
-	jal	printGameOver
+resign:
+	jal	printResignLose
+	j	leftOver
+timeUp:
+	jal	printTimeLose
+leftOver:
 	move	$a0, $s1
 	jal	collapseList	# clean list for leftover print
 	move	$a0, $s1

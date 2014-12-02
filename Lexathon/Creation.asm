@@ -28,7 +28,7 @@
 #	testSc: .asciiz "4LetterWordList3911.txt"
 #	testSc2:.asciiz "5LetterWordList4.txt"
 
-	nl:	.asciiz	"\n"
+#	nl:	.asciiz	"\n"
 	
 #	words4: .asciiz "4LetterWordList3911.txt"
 #	words5: .asciiz "5LetterWordList8649.txt"

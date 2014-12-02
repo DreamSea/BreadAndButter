@@ -14,6 +14,8 @@ fake:	.asciiz "a . b . c . . ... . w . a .. wawta @"
 fakeWd:	.asciiz "@aaaa"
 nl_:	.asciiz "\n"
 
+shf	:.asciiz "shuffling placeholder\n"
+
 .text
 
 testing:
@@ -128,7 +130,7 @@ end:
 ##
 # in:	a0 - word list
 # 	a1 - word
-# out:	v0 - 0 if no, 1 if yes
+# out:	v0 - 0 if no, 1 if yes, -1 if quit
 #	v1 - number of letters in word, meaningless if v0 is 0
 ##
 checkWord:
@@ -136,6 +138,8 @@ checkWord:
 	lb	$t0, 0($a1)		# precheck against '@', '?', etc
 	beq	$t0, 64, finishCW	# @ input found
 	beq	$t0, 10, finishCW	# \n input found
+	beq	$t0, 63, shuffleMid
+	beq	$t0, 33, resignCW
 resetCW:
 	move	$t0, $a1
 	li	$t3, 0			# letter counter for backtrack stage
@@ -165,6 +169,9 @@ replaceCW:
 	bnez	$t3, replaceCW
 finishCW:
 	jr 	$ra
+resignCW:
+	li	$v0, -1
+	jr	$ra
 	
 ##
 # compress list by removing periods
@@ -196,3 +203,15 @@ finalWrite:
 	sb	$0, 0($t0)
 finishCL:
 	jr	$ra	
+
+##
+#
+##
+#
+##
+shuffleMid:
+	la	$a0, shf
+	li	$v0, 4
+	syscall
+	li	$v0, 0
+	jr	$ra

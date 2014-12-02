@@ -1,6 +1,6 @@
 .globl	printTitleInfo getUserChar printLn printTime
 .globl	printReadyInfo getUserString print3x3Word
-.globl	printGameOver printState printExtraTime printLeftover
+.globl	printTimeLose printResignLose printState printExtraTime printLeftover
 .data
 infoSt:	.asciiz	"(n)ew game\n"
 infoQu:	.asciiz	"(q)uit\n"
@@ -8,8 +8,9 @@ infoRd:	.asciiz "(r)eady\n"
 infoBa:	.asciiz "(b)ack\n"
 strCmd:	.asciiz "Command: "
 strTime:.asciiz	"Time Left (s): "
-strGues:.asciiz "Guess: "
+strGues:.asciiz "(?) Shuffle (!) Resign\nGuess: "
 strOver:.asciiz "Time is up.\n"
+strRes:	.asciiz "Resigned.\n"
 strList:.asciiz " letters: "
 strGood:.asciiz "Word Found, Seconds +"
 strLeft:.asciiz "Words Left: "
@@ -157,12 +158,19 @@ print3x3Finish:
 	jr	$ra
 
 ## game over (time ran out)
-printGameOver:
+printTimeLose:
 	la	$a0, strOver
 	li	$v0, 4
 	syscall
 	jr	$ra
-	
+
+## game over (resigned)
+printResignLose:
+	la	$a0, strRes
+	li	$v0, 4
+	syscall
+	jr	$ra
+			
 ## print string for +time
 # input $a0: how much time was added
 printExtraTime:
