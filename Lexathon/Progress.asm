@@ -1,7 +1,9 @@
-.globl	generateState, getState, putWord, checkWord, collapseList
+.globl	allCreation, getState, putWord, checkWord, collapseList, getLetters, getList
 
 .data
-state:	.space 1000			# arbitrary estimate, copying theList size
+letters:.space 10
+theList:.space 1000
+state:	.space 1000	# arbitrary estimate, copying theList size
 addrTbl:.word addr4, addr5, addr6, addr7, addr8, addr9
 addr4:	.word 0
 addr5:	.word 0
@@ -32,6 +34,26 @@ testing:
 	
 	li	$v0, 10
 	syscall
+
+##
+#
+##
+allCreation:
+	addiu	$sp, $sp, -4	# store return address on stack
+	sw	$ra, 0($sp)
+	
+	la	$a0, letters
+	jal	random9Word
+	la	$a0, letters
+	la	$a1, theList
+	jal	scrabbleList
+	
+	la	$a0, theList
+	jal	generateState
+	
+	lw	$ra, 0($sp)	# recover return address from stack
+	addiu	$sp, $sp, 4
+	jr	$ra
 
 ##
 # creates an array mirroring theList with '.' swapped for characters
@@ -128,12 +150,13 @@ end:
 # checks if word is in list, and if so mark/replace it with periods
 # preserves a1
 ##
-# in:	a0 - word list
+# in:	??? not needed anymore ??? a0 - word list
 # 	a1 - word
 # out:	v0 - 0 if no, 1 if yes, -1 if quit
 #	v1 - number of letters in word, meaningless if v0 is 0
 ##
 checkWord:
+	la	$a0, theList
 	li	$v0, 0
 	lb	$t0, 0($a1)		# precheck against '@', '?', etc
 	beq	$t0, 64, finishCW	# @ input found
@@ -176,9 +199,10 @@ resignCW:
 ##
 # compress list by removing periods
 ##
-# in:	a0 - word list
+# in:	??? not needed anymore ??? a0 - word list
 ##
 collapseList:
+	la	$a0, theList
 	li	$t3, 46		# value of period
 	li	$t4, 32		# value of space
 	li	$t5, 0		# last found (to check against space after period)	
@@ -207,6 +231,9 @@ finishCL:
 ##
 #
 ##
+shuffleAll:
+
+##
 #
 ##
 shuffleMid:
@@ -214,4 +241,16 @@ shuffleMid:
 	li	$v0, 4
 	syscall
 	li	$v0, 0
+	jr	$ra
+	
+##
+#
+##
+getLetters:
+	la	$v0, letters
+	jr	$ra
+
+##
+getList:
+	la	$v0, theList
 	jr	$ra

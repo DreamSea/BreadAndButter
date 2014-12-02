@@ -1,7 +1,7 @@
 .globl main
 .data
-initTime:	.word	30000 # game starts with N/1000 seconds
-extraTime:	.word	5000 # +N/1000 seconds per good guess
+initTime:	.word	60000 # game starts with N/1000 seconds
+extraTime:	.word	10000 # +N/1000 seconds per good guess
 .text
 main:
 start:
@@ -13,14 +13,7 @@ start:
 	j	start			# else { ask again }
 
 newGame:
-	jal	random9Word
-	### NEED TO SHUFFLE WORD HERE ###
-	move	$s0, $v0		# store shuffled word in $s0
-	move	$a0, $s0
-	jal	scrabbleList
-	move	$s1, $v0		# store word list in $s1
-	move	$a0, $s1
-	jal	generateState		# prep state
+	jal	allCreation
 newGameChoice:	
 	jal	printReadyInfo
 	jal	getUserChar
@@ -54,8 +47,9 @@ showWords:
 	addi	$s3, $s3, 1
 	blt	$s3, 10, showWords
 	
-	move	$a0, $s0		# print 3x3 grid
-	jal	print3x3Word
+	jal	getLetters
+	move	$a0, $v0		
+	jal	print3x3Word		# print 3x3 grid
 	jal	getUserString
 	move	$s4, $v0		# s4 contains string input
 
@@ -65,7 +59,6 @@ showWords:
 	blez	$t0, timeUp		# check if time over
 	move	$s5, $t0		# s5 contains time left 
 	
-	move	$a0, $s1		# pass list as argument
 	move	$a1, $s4		# pass word as argument
 	jal	checkWord
 	beq	$v0, -1, resign
@@ -84,7 +77,7 @@ continue:
 	move	$a0, $s5		# time info
 	jal	printTime	
 			
-	j gameLoop
+	j 	gameLoop
 	
 resign:
 	jal	printResignLose
@@ -92,9 +85,9 @@ resign:
 timeUp:
 	jal	printTimeLose
 leftOver:
-	move	$a0, $s1
 	jal	collapseList	# clean list for leftover print
-	move	$a0, $s1
+	jal	getList		# get list to print leftovers
+	move	$a0, $v0
 	jal	printLeftover
 	jal	printLn
 	j	start
