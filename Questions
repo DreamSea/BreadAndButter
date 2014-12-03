@@ -5,6 +5,8 @@ Notes on Project or questions/suggestions so far
    else and then I changed the amount of space for theList on Line 23 of Creation.asm to 2000 instead
    of 1000--- Alright I saw the changes in all the files and the only thing different that makes it work is the
    files are in the home directory of Mars4_4.jar with everything else in Lexathon folder---
+   
+   The Shuffle isn't working for me. 
 
 
 A) Currently in Creation.asm…
