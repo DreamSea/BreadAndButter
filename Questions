@@ -5,8 +5,16 @@ Notes on Project or questions/suggestions so far
    else and then I changed the amount of space for theList on Line 23 of Creation.asm to 2000 instead
    of 1000--- Alright I saw the changes in all the files and the only thing different that makes it work is the
    files are in the home directory of Mars4_4.jar with everything else in Lexathon folder---
+   >> Speed is pretty varying and probably depends on how JVM is feeling. For me, sometimes list generation works in under
+   >> 10 seconds, other times it takes over 30. I'll probably move the word lists to Lexathon folder after renaming
+   >> them. Folder paths were probably what was breaking mac/unix vs windows.
+
+   >> Unless something is going wrong, changing space for theList from 1000 to 2000 shouldn't really do
+   >> anything. 1000 already allows for ~100 10 letter words, when the actual average is probably around 30 5 letter
+   >> words. Had to bump it up to 1000 from 300 or so before when some freak list sizes were overflowing 300 bytes.
    
    The Shuffle isn't working for me. 
+   >> I'll look at it tomorrow (well, later today)
 
 
 A) Currently in Creation.asm…
