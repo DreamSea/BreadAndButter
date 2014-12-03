@@ -4,7 +4,7 @@ BreadAndButter
 CS 3340 Computer Architecture - Semester Project
 
 Program Features: System Console I/O, Dictionary Generation, Timer
-Program Limitations: Compatible with Windows ONLY
+Program Limitations: Best Compatible with Windows OS, Mac and Linux Semi-Compatible  
 
 Lexathon Folder should contain files: Creation.asm, Display.asm, Driver.asm, Progress.asm and Folder -> WordList
 WordList Folder should contain 6 text files containing dictionaries of words with 4-9 letters accordingly.
