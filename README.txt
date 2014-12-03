@@ -8,8 +8,14 @@ OS Compatibility: Windows and Mac
 Program Limitations: Not sure about Linux
 
 Lexathon Folder should contain files: Creation.asm, Display.asm, Driver.asm, Progress.asm and Folder -> WordList
+
 WordList Folder should contain 6 text files containing dictionaries of words with 4-9 letters accordingly.
 ex. s4LetterWordList1967.txt with 4 being number of letters in word and 1967 being amount of words in dictionary. 
+
+For Mac Compatibility-> Move all Dictionary WordList TextFiles into Lexathon Folder
+                     -> Change Creation.asm to point directly to filename
+                     ->  ex. words4: .asciiz "s4LetterWordList1967.txt"
+
 
 ________User Guide________
 
