@@ -12,25 +12,16 @@ addr7:	.word 0
 addr8:	.word 0
 addr9:	.word 0
 
-fake:	.asciiz "a . b . c . . ... . w . a .. wawta @"
+fake:	.asciiz "abcdefghi\n"
 fakeWd:	.asciiz "@aaaa"
-nl_:	.asciiz "\n"
-
-shf	:.asciiz "shuffling placeholder\n"
 
 .text
 
 testing:
-	la	$a0, fake
+	la	$a0, letters
 	la	$v0, 4
 	syscall
-	jal	collapseList
 	
-	la	$v0, 4
-	la	$a0, nl_
-	syscall
-	la	$a0, fake
-	syscall
 	
 	li	$v0, 10
 	syscall
@@ -44,6 +35,8 @@ allCreation:
 	
 	la	$a0, letters
 	jal	random9Word
+	li	$a0, 9
+	jal	shuffle
 	la	$a0, letters
 	la	$a1, theList
 	jal	scrabbleList
@@ -229,18 +222,53 @@ finishCL:
 	jr	$ra	
 
 ##
-#
+#To shuffle an array a of n elements (indices 0..n-1):
+# for i from n ? 1 downto 1 do
+#      j ? random integer with 0 ? j ? i
+#      exchange a[j] and a[i]
 ##
-shuffleAll:
+#	a0: number of letters to shuffle
+##
+shuffle:
+	addi	$t0, $a0, -1
+shuffleLoop:
+	li	$v0, 42
+	move	$a1, $t0
+	syscall
+	
+	lb	$t1, letters($a0)
+	lb	$t2, letters($t0)
+	sb	$t2, letters($a0)
+	sb	$t1, letters($t0)
+	
+	addi	$t0, $t0, -1
+	bgtz	$t0, shuffleLoop
+	
+	jr	$ra
 
 ##
-#
+#	Shuffles letters array while keeping middle letter same
 ##
 shuffleMid:
-	la	$a0, shf
-	li	$v0, 4
-	syscall
-	li	$v0, 0
+	addi	$sp, $sp, -4
+	sw	$ra, 0($sp)
+	
+	lb	$t0, letters+4
+	lb	$t1, letters+8
+	sb	$t0, letters+8
+	sb	$t1, letters+4
+	
+	li	$a0, 8
+	jal shuffle
+
+	lb	$t0, letters+4
+	lb	$t1, letters+8
+	sb	$t0, letters+8
+	sb	$t1, letters+4
+	
+	
+	lw	$ra, 0($sp)
+	addi	$sp, $sp, 4
 	jr	$ra
 	
 ##

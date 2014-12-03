@@ -1,22 +1,25 @@
-.globl	printTitleInfo getUserChar printLn printTime
+.globl	printTitleInfo printHighscore getUserChar printLn printTime printScore
 .globl	printReadyInfo getUserString print3x3Word
-.globl	printTimeLose printResignLose printState printExtraTime printLeftover
+.globl	printTimeLose printResignLose printState printGood printLeftover printNewHigh
 .data
+infoHi: .asciiz "High Score: "
 infoSt:	.asciiz	"(n)ew game\n"
 infoQu:	.asciiz	"(q)uit\n"
 infoRd:	.asciiz "(r)eady\n"
 infoBa:	.asciiz "(b)ack\n"
 strCmd:	.asciiz "Command: "
 strTime:.asciiz	"Time Left (s): "
+strScor:.asciiz "Your score: "
+strBeat:.asciiz "Highscore to beat: "
 strGues:.asciiz "(?) Shuffle (!) Resign\nGuess: "
 strOver:.asciiz "Time is up.\n"
 strRes:	.asciiz "Resigned.\n"
+strNHi: .asciiz "***New Highscore***\n"
 strList:.asciiz " letters: "
 strGood:.asciiz "Word Found, Seconds +"
+strGoo2:.asciiz ", Score +"
 strLeft:.asciiz "Words Left: "
 _tab:	.asciiz	"\t"
-#_left:	.asciiz " ["
-#_right:	.asciiz	"] "
 _gap:	.asciiz "  "
 _nl:	.asciiz	"\n"
 
@@ -39,6 +42,20 @@ printTitleInfo:
 	syscall
 	jr	$ra
 
+## current highscore
+# a0 - highscore
+printHighscore:
+	move	$t0, $a0
+	li	$v0, 4
+	la	$a0, infoHi
+	syscall
+	move	$a0, $t0
+	li	$v0, 1
+	syscall
+	li	$v0, 11
+	li	$a0, 10
+	syscall
+	jr	$ra
 
 ## read user choice (one character)
 # returns v0: user choice
@@ -70,7 +87,33 @@ printTime:
 	la	$a0, _nl
 	syscall
 	jr	$ra
+# input a0: score to print
+# input a1: score to beat
+printScore:
+	move	$t0, $a0
+	move	$t1, $a1
+	la	$a0, strScor
+	li	$v0, 4
+	syscall
+	move	$a0, $t0
+	li	$v0, 1
+	syscall
+	li	$v0, 4
+	la	$a0, _nl
+	syscall
+	la	$a0, strBeat
+	li	$v0, 4
+	syscall
+	move	$a0, $t1
+	li	$v0, 1
+	syscall
+	li	$v0, 4
+	la	$a0, _nl
+	syscall
 	
+	jr	$ra
+	
+
 ## title menu
 printReadyInfo:
 	li	$v0, 4
@@ -173,14 +216,23 @@ printResignLose:
 			
 ## print string for +time
 # input $a0: how much time was added
-printExtraTime:
+# input $a1: how much score was added
+printGood:
 	move	$t0, $a0
+	move	$t1, $a1
 	la	$a0, strGood
 	li	$v0, 4
 	syscall
 	div	$a0, $t0, 1000
 	li	$v0, 1
 	syscall
+	la	$a0, strGoo2
+	li	$v0, 4
+	syscall
+	move	$a0, $t1
+	li	$v0, 1
+	syscall
+	
 	la	$a0, _nl
 	li	$v0, 4
 	syscall
@@ -188,13 +240,30 @@ printExtraTime:
 
 ## prints leftover words
 # input $a0: leftover words
+# input $a1: final score
 printLeftover:
 	move	$t0, $a0
+	move	$t1, $a1
 	la	$a0, strLeft
 	li	$v0, 4
 	syscall
 	move	$a0, $t0
 	syscall
 	la	$a0, _nl
+	syscall
+	la	$a0, strScor
+	li	$v0, 4
+	syscall
+	move	$a0, $t1
+	li	$v0, 1
+	syscall
+	li	$v0, 4
+	la	$a0, _nl
+	syscall
+	jr	$ra
+
+printNewHigh:
+	la	$a0, strNHi
+	li	$v0, 4
 	syscall
 	jr	$ra

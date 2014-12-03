@@ -3,6 +3,9 @@
 # $s2 : n-letter list to print, use in showWords loop
 # $s3 : contains word input from user
 # $s4 : contains time left, equal to $s0 minus current time
+# $s5 : current score
+# $s6 : last score bonus
+# $s7 : current highscore
 # ---
 # TODO: can mess with scoring in $s5 - s7
 # TODO: maybe adjust time bonus based on letters
@@ -14,7 +17,10 @@ initTime:	.word	60000 # game starts with N/1000 seconds
 extraTime:	.word	10000 # +N/1000 seconds per good guess
 .text
 main:
+	li	$s7, 0			# init highscore to 0
 start:
+	move	$a0, $s7
+	jal	printHighscore
 	jal	printTitleInfo		# choices at title screen
 	jal	getUserChar
 	
@@ -38,12 +44,16 @@ beginGame:
 	syscall
 	addu	$s0, $a0, $t0		# $s0 contains absolute time limit
 	lw	$s1, extraTime		# $s1 contains time bonus per good guess
+	li	$s5, 0			# $s5 contains score, start at 0
 
 	li	$v0, 30			# first time update
 	syscall
 	subu	$t0, $s0, $a0
 	move	$a0, $t0
 	jal	printTime
+	move	$a0, $s5
+	move	$a1, $s7
+	jal	printScore
 gameLoop:	
 	li	$s2, 4			# $s2 contains word length of current list
 showWords:	
@@ -75,16 +85,24 @@ showWords:
 	beq	$v0, 1, goodGuess
 	j	continue
 goodGuess:
+	sll	$s6, $v1, 10		# bonus for letter length (length * 1024)
+	sra	$t0, $s4, 10		# bonus for time (milli / 1024)
+	add	$s6, $s6, $t0
 	move	$a0, $v1		# pass number of letters
 	move	$a1, $s3		# pass word
 	jal	putWord
 	add	$s0, $s0, $s1		# + extra time to absolute	
 	add	$s4, $s4, $s1		# update time left too
 	move	$a0, $s1
-	jal	printExtraTime
+	move	$a1, $s6
+	add	$s5, $s5, $s6 
+	jal	printGood
 continue:	
 	move	$a0, $s4		# time info
-	jal	printTime				
+	jal	printTime
+	move	$a0, $s5
+	move	$a1, $s7
+	jal	printScore	
 	j 	gameLoop
 
 resign:
@@ -96,8 +114,13 @@ leftOver:
 	jal	collapseList	# clean list for leftover print
 	jal	getList		# get list to print leftovers
 	move	$a0, $v0
+	move	$a1, $s5
 	jal	printLeftover
 	jal	printLn
+	ble	$s5, $s7, notHigh
+	move	$s7, $s5
+	jal	printNewHigh
+notHigh:	
 	j	start
 quit:
 	li	$v0, 10
