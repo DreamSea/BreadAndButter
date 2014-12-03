@@ -1,0 +1,82 @@
+Notes on Project or questions/suggestions so far
+
+A) Currently in Creation.asm…
+
+newline variable is places all over. 
+Is there such thing as header files in MIPS? instead of having it all over? make it global in one file? 
+>> newlines were mainly used in testing. the way driver is hooked up to Display.asm though, can
+>> *probably* (not 100% sure) comment out all the newlines in files other than display, since display
+>> should be the only thing printing anything to console. might be able to make newline label global
+>> similar to how functions can be made global, but I never tried.
+
+--------Idky but I have all the files in Mars and I build them all, some would build while others had issues 
+referencing  functions from other files. The globl. directives weren't being recognized? Idk I went on a tangent 
+I tried to figure out how to save the function addresses in the global pointer register, but Idk what to do like 
+when setting the functions from other files to the $gp I figured for each address stored you decrement 4 from the
+$gp, and then store the values for each file after decrementing accrodingly.
+file1 = global functions 2 -> sub 8 from gp -> store 1 at 0gp -> store 2 at 4gp
+file2 = global functions 3 -> sub 12 from gp -> store 1 at 0gp -> store 2 at 4gp -> store 3 at 8gp
+
+Or could I decrement the total global functions * 4 all in one file and just keep 
+storing elements from one file to the next.
+file1 = same as above everything but sub 20 -> store 1 at 0gp -> store 2 at 4gp
+file2 = same as above but no sub ->store1 at 8gp -> store 2 at 12gp -> store 3 at 16gp 
+>> idea for stack pointers (in the end decided not to mess with global pointer since mips/mars isn't
+>> very clear on what it's for), really only need to worry about incr/decr stack pointer when switching
+>> between functions. each function/file is responsible for preserving the original stack pointer on exit,
+>> as in if a function decrs the pointer, then it needs to incr it back before the function finishes. by
+>> having each file responsible for its own, it lets it be certain where a specific value is stored on the
+>> stack. otherwise if set some original value on the stack and other files modify the pointer before returning,
+>> would only be able guess at where the original value is now. guessing in assembly is generally bad. :x
+>>
+>> granted when solo/rambo programming it's possible to just 'know' how all the functions interact and where the
+>> sp is, but it becomes nearly impossible to hook cleanly with functions by other people (if they rely on
+>> the stack pointer).
+
+In the end I don't know if any of what I just typed makes any sense lol! because yeah Idk it seems overly complicated
+but yeah Idk I still can't get it to compile----------
+>> oops, I never really mentioned this anywhere. to build, put the Mars4_4.jar in folder Lexathon.
+>> when assembling, check 'build/assemble all files in same directory' and 'init program counter to global main'
+
+--------------Roger that! I have it compiling and running. For the instructions I entered 'q' to quit and it worked 
+but when I entered 'n' it went into some sort of endless loop. Or How long is is supposed to take? ------------------
+>> depends on how computer is feeling really. for me it takes anywhere between 5 seconds and 20 seconds to generate
+>> the dictionary/whatever. if you don't see output of "...4 letters generated\n" within 30 seconds then something
+>> is probably wrong (it probably cant find the .txt files). try running mars through command line
+>> with 'java -jar mars4_4.jar' if you haven't been, it's (cmdline) the only way I can get mars to read from files.
+>>
+>> guess there is console output outside of display, forgot about that.
+
+Line 128 why -97? What is the Original Table supposed to contain. 
+I can see is it is looping down from 9 -> 0 and breaks to the next thing,
+but I’m not sure what values except the fact the table is 26*4. 
+What does OriginalTable supposed to contain and compare and what does the CheckTable contain?
+I am guessing the OrginalTable contains the valid words CheckTable contains the guess?
+>> table is pretty much int array of size 26, one for each letter. subtracting 97 from ascii value of
+>> 'a' gives 0, which allows for jumping into table with a = 0, b = 1, z = 25, etc. table is same thing
+>> as using hashtable/map to count letters (if youve had to do anything similar in higher level language).
+>> Making each entry byte sized allows for using loadbyte to grab numbers out of the array, and is a big
+>> enough container (0-15) because at most a letter would appear 9 times (given 9 letter words).
+>>
+>> the table stuff in creation is to for checking that word can be made out of letters of another word,
+>> comparing guess word to dictionary word is done in more straightforward way Progress.asm [see checkWord()]
+>> one there just loops through letters one at a time to see if they match exactly
+>>
+>> creation version: abcdefg vs cfbegda has to be confirmed as a match
+>> progress version: abcdefg vs abcdefg has to match, but not abcdefg vs cfbegda
+
+Overview of 
+Creation.asm->(Set Data Variables and Global Functions)->
+ScrabbleList -> WipeOriTable -> MakeOriTable (in the same function it sets up a list to be written to)
+->CheckList (Sets Variables to pass to openFile)-> OpenFile
+->GrabNext (called to grab next item to be compared. -
+This function is thrown in the beginning when grabbing -
+the first string to compare and when comparisons are -
+not equal in LoopCheck)
+-> NextWord(Returns word from file buffer)
+
+In GrabNext function: 
+After grabbing first string to be compared: If Last letter != '@'
+—>(reset chkTable) -> WipeCheck -> LoopCheck ->(If comparisons are equal)-> CopyWord
+Else 
+—>FinishUp (Closes file)
