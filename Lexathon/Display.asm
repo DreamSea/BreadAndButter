@@ -1,9 +1,11 @@
 .globl	printTitleInfo printHighscore getUserChar printLn printTime printScore
 .globl	printReadyInfo getUserString print3x3Word
-.globl	printTimeLose printResignLose printState printGood printLeftover printNewHigh
+.globl	printTimeLose printResignLose printState printGood printLeftover printNewHigh getWho
 .data
 infoHi: .asciiz "High Score: "
+infoBy: .asciiz " by "
 infoSt:	.asciiz	"(n)ew game\n"
+infoRs:	.asciiz	"(r)eset highscore\n"
 infoQu:	.asciiz	"(q)uit\n"
 infoRd:	.asciiz "(r)eady\n"
 infoBa:	.asciiz "(b)ack\n"
@@ -15,6 +17,7 @@ strGues:.asciiz "(?) Shuffle (!) Resign\nGuess: "
 strOver:.asciiz "Time is up.\n"
 strRes:	.asciiz "Resigned.\n"
 strNHi: .asciiz "***New Highscore***\n"
+strWho:	.asciiz "Input name (4 letters): "
 strList:.asciiz " letters: "
 strGood:.asciiz "Word Found, Seconds +"
 strGoo2:.asciiz ", Score +"
@@ -38,22 +41,31 @@ printTitleInfo:
 	li	$v0, 4
 	la	$a0, infoSt
 	syscall
+	la	$a0, infoRs
+	syscall
 	la	$a0, infoQu
 	syscall
 	jr	$ra
 
 ## current highscore
 # a0 - highscore
+# a1 - address of highscorer
 printHighscore:
 	move	$t0, $a0
+	move	$t1, $a1
 	li	$v0, 4
 	la	$a0, infoHi
 	syscall
 	move	$a0, $t0
 	li	$v0, 1
 	syscall
-	li	$v0, 11
+	la	$a0, infoBy
+	li	$v0, 4
+	syscall
+	move	$a0, $t1
+	syscall
 	li	$a0, 10
+	li	$v0, 11
 	syscall
 	jr	$ra
 
@@ -265,5 +277,17 @@ printLeftover:
 printNewHigh:
 	la	$a0, strNHi
 	li	$v0, 4
+	syscall
+	la	$a0, strWho
+	syscall
+	jr	$ra
+	
+# a0: address to store name
+getWho:
+	li	$v0, 8
+	li	$a1, 5
+	syscall
+	li	$v0, 11
+	li	$a0, 10
 	syscall
 	jr	$ra

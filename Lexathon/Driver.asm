@@ -7,7 +7,6 @@
 # $s6 : last score bonus
 # $s7 : current highscore
 # ---
-# TODO: can mess with scoring in $s5 - s7
 # TODO: maybe adjust time bonus based on letters
 # TODO: end game when user has guessed every word
 
@@ -15,18 +14,85 @@
 .data
 initTime:	.word	60000 # game starts with N/1000 seconds
 extraTime:	.word	10000 # +N/1000 seconds per good guess
+scoreWord:	.word	0
+scoreName:	.asciiz	"none"
+scoreFile:	.asciiz	"zHighscore.txt"
 .text
 main:
 	li	$s7, 0			# init highscore to 0
+	jal	loadScore
 start:
 	move	$a0, $s7
+	la	$a1, scoreName
 	jal	printHighscore
 	jal	printTitleInfo		# choices at title screen
 	jal	getUserChar
 	
 	beq	$v0, 113, quit		# if (input == 'q') { quit }
 	beq	$v0, 110, newGame	# if (input == 'n') { new game }
+	beq	$v0, 114, resetScore	# if (input == 'r') { reset highscore }
 	j	start			# else { ask again }
+
+resetScore:
+	li	$s7, 0
+	li	$t0, 110
+	la	$t1, scoreName
+	sb	$t0, 0($t1)
+	sb	$t0, 2($t1)
+	li	$t0, 111
+	sb	$t0, 1($t1)
+	li	$t0, 101
+	sb	$t0, 3($t1)
+	
+	jal	saveScore
+	j	start
+
+saveScore:
+	sw	$s7, scoreWord
+	li	$v0, 13		# system call for open file
+	la	$a0, scoreFile	# output file name
+	li	$a1, 1		# Open for writing (flags are 0: read, 1: write)
+	syscall
+	move	$t0, $v0	# file desc
+	
+	li	$v0, 15
+	move	$a0, $t0
+	la	$a1, scoreWord
+	li	$a2, 4		# 4 bytes to a word
+	syscall			# write file
+	li	$v0, 15
+	la	$a1, scoreName
+	syscall
+	li	$v0, 16
+	move	$a0, $t0
+	syscall			# close file
+	jr	$ra
+	
+loadScore:
+	li	$v0, 13		# system call for open file
+	la	$a0, scoreFile	# output file name
+	li	$a1, 0		# Open for writing (flags are 0: read, 1: write)
+	syscall
+	move	$t0, $v0	# file desc
+	
+	li	$v0, 14
+	move	$a0, $t0
+	la	$a1, scoreWord
+	li	$a2, 4		# 4 bytes to a word
+	syscall			# read file
+	lw	$s7, scoreWord
+	
+	li	$v0, 14
+	la	$a1, scoreName
+	syscall
+	sb	$0, scoreName($v0)
+	
+	li	$v0, 16
+	move	$a0, $t0
+	syscall			# close file
+	jr	$ra
+	
+##################################################################
 
 newGame:
 	jal	allCreation
@@ -118,8 +184,12 @@ leftOver:
 	jal	printLeftover
 	jal	printLn
 	ble	$s5, $s7, notHigh
-	move	$s7, $s5
 	jal	printNewHigh
+	la	$a0, scoreName
+	jal	getWho
+	
+	move	$s7, $s5
+	jal	saveScore
 notHigh:	
 	j	start
 quit:
