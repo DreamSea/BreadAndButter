@@ -1,5 +1,10 @@
 Notes on Project or questions/suggestions so far
 
+Hey I want to say I was working on the scoring stuff but It never completely worked :( I was working on it for awhile and
+also the shuffling and and some commenting to understand the code better myself. What is there left to do? I keep trying to 
+do stuff and you guys keep finishing it up before I get it to work lol
+
+
 ---I changed the filenames in Creation and it started to work but very slowly. It might work with more editing!
    Alright I got it to work a lot faster! I put the files from WordList into the same directory as everything 
    else and then I changed the amount of space for theList on Line 23 of Creation.asm to 2000 instead
