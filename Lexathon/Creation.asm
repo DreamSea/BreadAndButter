@@ -19,16 +19,13 @@
 
 .data
 	buffer:	.space 10			# longest word will be 9 letters + /0, use for read from file
-	return9:.space 10			# address of 9 letter word to return (allows buffer reuse)
-	theList:.space 1000			# arbitrary estimate of 1000 bytes for scrabble list
-	
 
 #	testFi:	.asciiz "9LetterWordList10.txt"  	
 #	testWo:	.asciiz "oncomings"
 #	testSc: .asciiz "4LetterWordList3911.txt"
 #	testSc2:.asciiz "5LetterWordList4.txt"
 
-	nl:	.asciiz	"\n"
+#	nl:	.asciiz	"\n"
 	
 #	words4: .asciiz "4LetterWordList3911.txt"
 #	words5: .asciiz "5LetterWordList8649.txt"
@@ -102,7 +99,7 @@
 
 ##
 # a0: word to check agaisnt
-# v0: address on heap of where list begins
+# a1: where to store list
 ##
 scrabbleList:
 	addiu	$sp, $sp, -16	# store return address on stack
@@ -142,7 +139,7 @@ makeOriTbl:
 #	move	$s2, $s0	# current heap address
 
 ## setting up list of words to return		
-	la	$s0, theList	# address of list base
+	move	$s0, $a1	# address of list base
 	move	$s2, $s0	# current list index address
 	
 # write 4 letter words
@@ -228,7 +225,7 @@ makeOriTbl:
 #	move	$a0, $t0	# allocate $t0 bytes on heap
 #	li	$v0, 9
 #	syscall
-	la	$v0, theList
+#	la	$v0, theList
 		
 	lw	$s2, 12($sp)		
 	lw	$s1, 8($sp)
@@ -336,11 +333,11 @@ finishUp:
 ##################################################################
 ##################################################################
 
-
 ##
-# v0: returns address of random 9 letter word
+# a0: address of where to store word
 ##
 random9Word:
+	move	$a3, $a0
 	la	$a0, words9
 	li	$a1, 9
 	lw	$a2, num9
@@ -349,7 +346,7 @@ random9Word:
 # a0: file address
 # a1: letter per word
 # a2: number of words in file
-# v0: returns address of random word
+# a3: address of where to store word
 randomWord:
 	addiu	$sp, $sp, -4	# store return address on stack
 	sw	$ra, 0($sp)
@@ -366,12 +363,14 @@ randomWord:
 	addi	$t3, $a0, 1	# place random int in $t3, which counts how many words to go through
 		
 	move	$a0, $t0	# file descriptor for nextWord()
-	la	$a1, buffer	# input buffer for nextWord()
+	move	$a1, $a3
+#	la	$a1, buffer	# input buffer for nextWord()
 	move	$a2, $t1	# letters/word for nextWord()
 randomLoop:
 	addi	$t3, $t3, -1
 	bnez	$t3, normalLoop
-	la	$a1, return9	# final loop input buffer
+	move	$a1, $a3	
+#	la	$a1, return9	# final loop input buffer
 normalLoop:
 	jal	nextWord	# only changes v0, up
 	bnez	$t3, randomLoop
@@ -379,7 +378,7 @@ normalLoop:
 	move	$a0, $t0	
 	jal	closeFile
 	
-	la	$v0, return9	# move chosen word into return register
+#	la	$v0, return9	# move chosen word into return register
 	
 	lw	$ra, 0($sp)	# recover return address from stack
 	addiu	$sp, $sp, 4
@@ -413,7 +412,6 @@ closeFile:
 
 ##
 #	changes only $v0 and $v1
-#	
 ##
 # a0: file distriptor
 # a1: input buffer
