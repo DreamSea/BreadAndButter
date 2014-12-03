@@ -1,6 +1,9 @@
 Notes on Project or questions/suggestions so far
 
----I changed the filenames in Creation and it started to work but very slowly. It might work with more editing!--- 
+---I changed the filenames in Creation and it started to work but very slowly. It might work with more editing!
+   Alright I got it to work a lot faster! I put the files from WordList into the same directory as everything 
+   else and then I changed the amount of space for theList on Line 23 of Creation.asm to 2000 instead
+   of 1000--- 
 
 
 A) Currently in Creation.asm…
