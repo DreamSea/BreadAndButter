@@ -171,11 +171,11 @@ loopCW:
 	beqz	$t2, successCW		# word reached \0
 	beq	$t2, 10, successCW	# word reached \n
 	beq	$t1, 64, finishCW	# list reached @
-	bne	$t1, $t2, resetCW	# letters dont match
+	bne	$t1, $t2, toSpaceCW	# letters dont match
 	j	loopCW
 successCW:
 	blt	$t3, 5, finishCW	# word didnt have enough letters
-	bne	$t1, 32, resetCW	# word was only prefix of list item
+	bne	$t1, 32, toSpaceCW	# word was only prefix of list item
 	li	$v0, 1
 	li	$t4, 46			# period
 	addi	$t5, $t5, -1		# undo add
@@ -191,6 +191,13 @@ finishCW:
 resignCW:
 	li	$v0, -1
 	jr	$ra
+toSpaceCW:				# keeps from matching suffix
+	beq	$t1, 32, resetCW
+	lb	$t1, 0($t5)
+	addi	$t5, $t5, 1
+	beq	$t1, 64, finishCW	# list reached @
+	bne	$t1, 32, toSpaceCW
+	j	resetCW
 	
 ##
 # 	void collapseList(): compress list by removing periods
