@@ -200,6 +200,7 @@ print3x3Loop:
 	syscall
 	
 	lb	$a0, 0($t1)	# next char
+	subi	$a0, $a0, 32	# in upper case
 	syscall
 	addi	$t1, $t1, 1
 	
@@ -207,6 +208,7 @@ print3x3Loop:
 	syscall
 	
 	lb	$a0, 0($t1)	# next char
+	subi	$a0, $a0, 32
 	syscall
 	addi	$t1, $t1, 1
 	
@@ -214,6 +216,7 @@ print3x3Loop:
 	syscall
 	
 	lb	$a0, 0($t1)	# print char
+	subi	$a0, $a0, 32
 	syscall
 	addi	$t1, $t1, 1
 	

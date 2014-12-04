@@ -40,6 +40,7 @@ During Execution:
   -> User can see each category from 4-9 letter words 
   -> User has to guess based on the 9 letter diagram given 
   -> Guess must contain middle letter in diagram
+  -> Guess must be made in lowercase letters
 --> User enters a guess
   -> If '?' entered, shuffle word and display again
   -> If '!' entered, give up current game
