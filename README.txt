@@ -9,6 +9,7 @@ Program Limitations:
 -> Not sure about Linux
 -> There is no 'winning' by guessing all the words. Because nobody wins.
 -> Not all games are 'fair'. It is definitely easier to score in some games than others.
+-> Smaller word list chosen to speed up game preparations, as such there are 'obvious' words missing
 
 Lexathon Folder should contain files: Creation.asm, Display.asm, Driver.asm, Progress.asm, [WordLists].txt, and possibly zHighscore.txt
 
