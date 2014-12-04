@@ -1,18 +1,14 @@
-# several shortcuts taken such that the methods in this break quite a few convention rules
-# 
-# fairly sure .globl random9Word /does/ obey convention rules as a whole, making it
-# safe to be called from from other files
-#
-# return9 exposed to outside, this .asm only changes return9 on random9Word calls
-#
+##
+#	Creation.asm: logic for setting up a new round/game
+##
 # globals:
 #   random9word
-#     String random9word():
-#       returns random 9 letter word in v0
+#     void random9word(String word):
+#       a0: address of where word is to be stored
 #   scrabbleList
-#     String[] scrabbleList(String word):
+#     void scrabbleList(String word, String[] list):
 #       a0: 9 letter word to check against (with middle character)
-#       returns statid data address in v0 containing list
+#       a1: address of list to store words in
  
 .globl	random9Word
 .globl	scrabbleList
@@ -24,8 +20,6 @@
 #	testWo:	.asciiz "oncomings"
 #	testSc: .asciiz "4LetterWordList3911.txt"
 #	testSc2:.asciiz "5LetterWordList4.txt"
-
-#	nl:	.asciiz	"\n"
 	
 #	words4: .asciiz "4LetterWordList3911.txt"
 #	words5: .asciiz "5LetterWordList8649.txt"
@@ -41,7 +35,7 @@
 	words7: .asciiz "s7LetterWordList7973.txt"
 	words8: .asciiz "s8LetterWordList8326.txt"
 	words9: .asciiz "s9LetterWordList7729.txt"
-	num9:	.word	7729
+	num9:	.word	7729	# num words in 9 letter list
 			
 	conf4:	.asciiz "...4 letters generated\n"
 	conf5:	.asciiz "...5 letters generated\n"
@@ -50,9 +44,9 @@
 	conf8:	.asciiz "...8 letters generated\n"
 	conf9:	.asciiz "...9 letters generated\n\n"
 		
-	oriTbl: .space 26
+	oriTbl: .space 26	# hashtable for original 9 letter word
 	.align	2 
-	chkTbl: .space 28
+	chkTbl: .space 28	# hashtable for words to check against original
 .text
 
 # testMisc:
@@ -357,21 +351,17 @@ randomWord:
 		
 	move	$a0, $t0	# file descriptor for nextWord()
 	move	$a1, $a3
-#	la	$a1, buffer	# input buffer for nextWord()
 	move	$a2, $t1	# letters/word for nextWord()
 randomLoop:
 	addi	$t3, $t3, -1
 	bnez	$t3, normalLoop
 	move	$a1, $a3	
-#	la	$a1, return9	# final loop input buffer
 normalLoop:
 	jal	nextWord	# only changes v0, up
 	bnez	$t3, randomLoop
 	
 	move	$a0, $t0	
 	jal	closeFile
-	
-#	la	$v0, return9	# move chosen word into return register
 	
 	lw	$ra, 0($sp)	# recover return address from stack
 	addiu	$sp, $sp, 4

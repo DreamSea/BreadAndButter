@@ -1,9 +1,15 @@
+##
+#	Progress.asm: contains state of game and logic for manipulating state
+##
+
 .globl	allCreation, getState, putWord, checkWord, collapseList, getLetters, getList
 
 .data
-letters:.space 10
-theList:.space 1000
-state:	.space 1000	# arbitrary estimate, copying theList size
+letters:.space 10	# 9 letters + null
+theList:.space 1000	# arbitrary estimate of buffer size needed for word list
+state:	.space 1000	# copying size of theList
+
+# jump table into state buffer
 addrTbl:.word addr4, addr5, addr6, addr7, addr8, addr9
 addr4:	.word 0
 addr5:	.word 0
@@ -12,47 +18,44 @@ addr7:	.word 0
 addr8:	.word 0
 addr9:	.word 0
 
-fake:	.asciiz "abcdefghi\n"
-fakeWd:	.asciiz "@aaaa"
+#fake:	.asciiz "abcdefghi\n"
+#fakeWd:	.asciiz "@aaaa"
 
 .text
 
-testing:
-	la	$a0, letters
-	la	$v0, 4
-	syscall
-	
-	
-	li	$v0, 10
-	syscall
+#testing:
+#	la	$a0, letters
+#	la	$v0, 4
+#	syscall	
+#	li	$v0, 10
+#	syscall
 
 ##
-#
+#	void allCreation(): sets up a new game/round
 ##
 allCreation:
 	addiu	$sp, $sp, -4	# store return address on stack
 	sw	$ra, 0($sp)
 	
 	la	$a0, letters
-	jal	random9Word
+	jal	random9Word	# grab random word
 	li	$a0, 9
-	jal	shuffle
+	jal	shuffle		# shuffle that word
 	la	$a0, letters
 	la	$a1, theList
-	jal	scrabbleList
+	jal	scrabbleList	# generate list from that word
 	
 	la	$a0, theList
-	jal	generateState
+	jal	generateState	# generate state display from list
 	
 	lw	$ra, 0($sp)	# recover return address from stack
 	addiu	$sp, $sp, 4
 	jr	$ra
 
 ##
-# creates an array mirroring theList with '.' swapped for characters
-# words of different length seperated by /0/0, .... ..../0/0..... ...../0/0......., etc
-##
-# input: a0 - address of theList to make state from
+#	void generateState(): creates an array mirroring theList with '.' swapped 
+#		for characters. words of different length seperated by /0/0 to
+#		handle cases where there are no words of a certain length
 ##
 generateState:
 	la	$t0, state
@@ -97,9 +100,10 @@ finishLoop:
 	jr	$ra
 
 ##
-# input: a0 - number of letters
+#	String getState(int numLetters)
 ##
-# returns: v0 - address in state for letters
+# 	input:	a0 - number of letters
+# 	return:	v0 - address in state for that number of letters
 ## 
 getState:
 	la	$t0, addrTbl
@@ -111,9 +115,9 @@ getState:
 	jr	$ra
 
 ##
-# updates state with word added to proper list		
+#	void putState(): updates state with word added to proper list		
 ##
-# in:	a0 - number of letters
+#	a0 - number of letters
 # 	a1 - word to add
 ##
 putWord:
@@ -140,29 +144,28 @@ end:
 	jr $ra
 
 ##
-# checks if word is in list, and if so mark/replace it with periods
-# preserves a1
+#	int[] checkWord(String word): checks if word is in list, and
+#  		if so mark/replace it with periods, returns result of check
 ##
-# in:	??? not needed anymore ??? a0 - word list
-# 	a1 - word
-# out:	v0 - 0 if no, 1 if yes, -1 if quit
-#	v1 - number of letters in word, meaningless if v0 is 0
+# 	in:	a0 - word
+# 	out:	v0 - 0 if no, 1 if yes, -1 if quit
+#		v1 - number of letters in word, meaningless if v0 is 0
 ##
 checkWord:
-	la	$a0, theList
+	la	$t5, theList
 	li	$v0, 0
-	lb	$t0, 0($a1)		# precheck against '@', '?', etc
+	lb	$t0, 0($a0)		# precheck against '@', '?', etc
 	beq	$t0, 64, finishCW	# @ input found
 	beq	$t0, 10, finishCW	# \n input found
 	beq	$t0, 63, shuffleMid
 	beq	$t0, 33, resignCW
 resetCW:
-	move	$t0, $a1
+	move	$t0, $a0
 	li	$t3, 0			# letter counter for backtrack stage
 loopCW:
-	lb	$t1, 0($a0)
+	lb	$t1, 0($t5)
 	lb	$t2, 0($t0)
-	addi	$a0, $a0, 1
+	addi	$t5, $t5, 1
 	addi	$t0, $t0, 1
 	addi	$t3, $t3, 1
 	beqz	$t2, successCW		# word reached \0
@@ -175,13 +178,13 @@ successCW:
 	bne	$t1, 32, resetCW	# word was only prefix of list item
 	li	$v0, 1
 	li	$t4, 46			# period
-	addi	$a0, $a0, -1		# undo add
+	addi	$t5, $t5, -1		# undo add
 	addi	$t3, $t3, -1
 	move	$v1, $t3		# store letter count
 replaceCW:
-	addi	$a0, $a0, -1
+	addi	$t5, $t5, -1
 	addi	$t3, $t3, -1
-	sb	$t4, 0($a0)		# fill with periods
+	sb	$t4, 0($t5)		# fill with periods
 	bnez	$t3, replaceCW
 finishCW:
 	jr 	$ra
@@ -190,27 +193,25 @@ resignCW:
 	jr	$ra
 	
 ##
-# compress list by removing periods
-##
-# in:	??? not needed anymore ??? a0 - word list
+# 	void collapseList(): compress list by removing periods
 ##
 collapseList:
-	la	$a0, theList
+	la	$t6, theList
 	li	$t3, 46		# value of period
 	li	$t4, 32		# value of space
 	li	$t5, 0		# last found (to check against space after period)	
 prepCL:
-	lb	$t1, 0($a0)
-	addi	$a0, $a0, 1
+	lb	$t1, 0($t6)
+	addi	$t6, $t6, 1
 	beq	$t1, 64, finishCL	# @ found, nothing to compress
 	bne	$t1, $t3, prepCL	# search for periods
-	addi	$t0, $a0, -1		# $t0 contains first period found
+	addi	$t0, $t6, -1		# $t0 contains first period found
 loopCL:
-	lb	$t1, 0($a0)
-	addi	$a0, $a0, 1
+	lb	$t1, 0($t6)
+	addi	$t6, $t6, 1
 	beqz	$t1, finalWrite
 	beq	$t1, $t3, loopCL	# adv through periods
-	lb	$t2, -2($a0)
+	lb	$t2, -2($t6)
 	beq	$t2, $t3, loopCL	# check if last one was a period
 writeCL:	
 	sb	$t1, 0($t0)		# transfer bytes over
@@ -222,6 +223,7 @@ finishCL:
 	jr	$ra	
 
 ##
+#	void shuffle(int numLetters): shuffles first n letters of stored word
 #To shuffle an array a of n elements (indices 0..n-1):
 # for i from n ? 1 downto 1 do
 #      j ? random integer with 0 ? j ? i
@@ -247,37 +249,38 @@ shuffleLoop:
 	jr	$ra
 
 ##
-#	Shuffles letters array while keeping middle letter same
+#	void shuffleMid(): Shuffles letters array while keeping middle letter same
 ##
 shuffleMid:
 	addi	$sp, $sp, -4
 	sw	$ra, 0($sp)
 	
-	lb	$t0, letters+4
+	lb	$t0, letters+4	# swap mid letter to end
 	lb	$t1, letters+8
 	sb	$t0, letters+8
 	sb	$t1, letters+4
 	
-	li	$a0, 8
+	li	$a0, 8		# shuffle up to end-1 char
 	jal shuffle
 
-	lb	$t0, letters+4
+	lb	$t0, letters+4	# swap end letter back to mid
 	lb	$t1, letters+8
 	sb	$t0, letters+8
 	sb	$t1, letters+4
-	
 	
 	lw	$ra, 0($sp)
 	addi	$sp, $sp, 4
 	jr	$ra
 	
 ##
-#
+#	String getLetters(): returns current shuffled word
 ##
 getLetters:
 	la	$v0, letters
 	jr	$ra
 
+##
+#	String[] getList(): returns word list
 ##
 getList:
 	la	$v0, theList
